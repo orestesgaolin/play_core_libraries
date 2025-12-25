@@ -10,7 +10,6 @@ This is alternative plugin to [in_app_update](https://pub.dev/packages/in_app_up
 - **Immediate Updates**: Force users to update before they can continue using the app
 - **Update Availability Check**: Query Google Play to check if an app update is available
 - **Progress Monitoring**: Track download and installation progress with real-time callbacks
-- **Error Handling**: Handle update failures, cancellations, and various error states
 - **Direct JNI Integration**: Uses JNI bindings for direct access to native Android APIs
 
 ## Platform Support
@@ -70,9 +69,39 @@ final updateTask = manager.startUpdateFlow(
 );
 ```
 
+### Flutter-friendly wrapper
+
+![](docs/screenshot_app_update.gif)
+
+If you prefer to avoid direct JNI types, use the high-level wrapper that mirrors the Play Core flows with Dart objects:
+
+```dart
+import 'package:play_in_app_update/wrapper.dart';
+
+late final PlayInAppUpdate updater;
+
+Future<void> initUpdater() async {
+  updater = await PlayInAppUpdate.create();
+
+  final info = await updater.checkForUpdate();
+
+  if (info.isFlexibleAllowed) {
+    await updater.startFlexibleUpdate(
+      onState: (state) {
+        if (state.status == InAppInstallStatus.downloaded) {
+          updater.completeFlexibleUpdate();
+        }
+      },
+    );
+  } else if (info.isImmediateAllowed) {
+    await updater.startImmediateUpdate();
+  }
+}
+```
+
 ## Example
 
-See the [example](example/lib/main.dart) for a complete implementation showing how to:
+See [example/lib/main.dart](example/lib/main.dart) for the low-level JNI usage and [example/lib/wrapper_page.dart](example/lib/wrapper_page.dart) for the wrapper-based UI. They show how to:
 
 - Check for updates
 - Handle both flexible and immediate update flows
@@ -105,9 +134,33 @@ To test in-app updates, you can use Google Play's Internal App Sharing feature. 
 5. Wait few minutes, you may need to open Google Play few times to see the update.
 6. Open the app and trigger the update flow to test the in-app update functionality.
 
+### Useful tools
+
+In the `tool/` directory you can find 2 useful scripts:
+
+- `build_and_upload.sh`: Builds the APK and uploads it to Internal App Sharing. Keeps track of version codes using a simple counter file in `tool/.next_build_number`.
+- `upload_internal_app_sharing.sh`: Uploads a given APK to Internal App Sharing.
+
+Both scripts require a service account JSON key with appropriate permissions. See [Codemagic's article](https://docs.codemagic.io/yaml-publishing/google-play/) how to create one.
+
 ## Contributing
 
 Contributions are welcome!
+
+### Regenerating JNI bindings
+
+First build the example apk:
+
+```sh
+cd example
+flutter build apk
+```
+
+Then run the jnigen tool to regenerate the bindings:
+
+```sh
+dart run tool/jnigen.dart
+```
 
 ## License
 

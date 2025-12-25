@@ -1,5 +1,6 @@
 // ignore_for_file: avoid_print
 
+import 'package:appupdate_example/wrapper_page.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:play_in_app_update/play_in_app_update.dart';
@@ -30,6 +31,7 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
   late OnCanceledListener onCanceledListener;
   late OnSuccessListener<AppUpdateInfo> onAppUpdateSuccessListener;
   late InstallStateUpdatedListenerProxy$InstallStateCallbackInterface installStateUpdatedListener;
+  InstallStateUpdatedListenerProxy? installStateUpdatedListenerProxy;
 
   @override
   void initState() {
@@ -129,6 +131,15 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
 
   @override
   void dispose() {
+    if (installStateUpdatedListenerProxy != null && manager != null) {
+      // Unregister to avoid callbacks hitting a disposed Dart port.
+      manager?.unregisterListener(
+        installStateUpdatedListenerProxy!.as(InstallStateUpdatedListener.type),
+      );
+      installStateUpdatedListenerProxy!.release();
+      installStateUpdatedListenerProxy = null;
+    }
+
     manager?.release();
     appUpdateInfo?.release();
     super.dispose();
@@ -148,6 +159,16 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
         appBar: AppBar(title: const Text('In-app Update test')),
         body: ListView(
           children: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => const InAppWrapperUpdatePage(),
+                  ),
+                );
+              },
+              child: const Text('See wrapper example'),
+            ),
             ElevatedButton(onPressed: updateTest, child: const Text('Check for update')),
             if (appUpdateInfo != null) ...[
               Text('Update availability: ${convertToUpdateAvailability()}'),
@@ -204,9 +225,9 @@ class _AppUpdatePageState extends State<AppUpdatePage> {
             .build(),
       );
 
+      installStateUpdatedListenerProxy = InstallStateUpdatedListenerProxy(installStateUpdatedListener);
       manager?.registerListener(
-        InstallStateUpdatedListenerProxy(installStateUpdatedListener) //
-            .as(InstallStateUpdatedListener.type),
+        installStateUpdatedListenerProxy!.as(InstallStateUpdatedListener.type),
       );
       _updateTask?.addOnSuccessListener(onInstallSuccessListener);
       _updateTask?.addOnFailureListener(onFailureListener);
