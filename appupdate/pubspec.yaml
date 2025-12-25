@@ -1,0 +1,27 @@
+name: play_in_app_update
+description: "Bindings for Google Play In-App Update Library"
+version: 1.0.0
+
+environment:
+  sdk: ^3.10.4
+  flutter: ">=3.3.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  jni: ^0.15.2
+  plugin_platform_interface: ^2.1.8
+
+dev_dependencies:
+  ffi: ^2.1.4
+  ffigen: ^20.1.1
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  jnigen: ^0.15.0
+
+flutter:
+  plugin:
+    platforms:
+      android:
+        ffiPlugin: true
