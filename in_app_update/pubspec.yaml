@@ -1,6 +1,8 @@
 name: play_in_app_update
 description: "Bindings for Google Play In-App Update Library"
 version: 1.0.0
+homepage: "https://github.com/orestesgaolin/play_core_libraries"
+repository: "https://github.com/orestesgaolin/play_core_libraries/tree/main/in_app_update"
 
 environment:
   sdk: ^3.10.4
