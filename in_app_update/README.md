@@ -71,7 +71,7 @@ final updateTask = manager.startUpdateFlow(
 
 ### Flutter-friendly wrapper
 
-![](doc/screenshot_app_update.gif)
+![](https://raw.githubusercontent.com/orestesgaolin/play_core_libraries/refs/heads/main/in_app_update/doc/screenshot_app_update.gif)
 
 If you prefer to avoid direct JNI types, use the high-level wrapper that mirrors the Play Core flows with Dart objects:
 
